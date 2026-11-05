@@ -22,13 +22,13 @@
     }
     input { width: 100%; }
     button { cursor: pointer; }
-    #status { white-space: pre-wrap; }
+    #status, #results { white-space: pre-wrap; }
   </style>
   <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
 </head>
 <body>
   <h1>Music Discovery</h1>
-  <p>Connect your Apple Music account to test personal music access.</p>
+  <p>Test access to your personal Apple Music data.</p>
 
   <label for="token">Temporary developer token</label>
   <input id="token" type="password"
@@ -36,14 +36,21 @@
          autocomplete="off">
 
   <button id="connect">Connect to Apple Music</button>
+  <button id="recent" disabled>Test Recent Plays</button>
+
   <p id="status">Waiting for authorization.</p>
+  <div id="results"></div>
 
   <script>
     const status = document.getElementById("status");
-    const button = document.getElementById("connect");
+    const connect = document.getElementById("connect");
+    const recent = document.getElementById("recent");
+    const results = document.getElementById("results");
 
-    button.addEventListener("click", async () => {
-      button.disabled = true;
+    let music;
+
+    connect.addEventListener("click", async () => {
+      connect.disabled = true;
       status.textContent = "Initializing MusicKit...";
 
       try {
@@ -52,28 +59,53 @@
 
         await MusicKit.configure({
           developerToken: token,
-          app: {
-            name: "Music Discovery",
-            build: "1.0"
-          }
+          app: { name: "Music Discovery", build: "1.0" }
         });
 
-        const music = MusicKit.getInstance();
-        status.textContent = "Requesting Apple Music authorization...";
+        music = MusicKit.getInstance();
+        status.textContent = "Requesting authorization...";
 
         await music.authorize();
 
-        // Never display or store the Music User Token.
-        status.textContent =
-          "Apple Music authorization successful!";
-
-        // Discard the developer token from the input.
         document.getElementById("token").value = "";
+        recent.disabled = false;
+        status.textContent = "Apple Music connected!";
       } catch (error) {
         status.textContent =
           "Authorization failed: " + (error.message || "Unknown error");
       } finally {
-        button.disabled = false;
+        connect.disabled = false;
+      }
+    });
+
+    recent.addEventListener("click", async () => {
+      recent.disabled = true;
+      status.textContent = "Fetching recently played tracks...";
+      results.textContent = "";
+
+      try {
+        const response = await music.api.music(
+          "/v1/me/recent/played/tracks",
+          { limit: 10 }
+        );
+
+        const tracks = response.data.data || [];
+
+        if (!tracks.length) {
+          results.textContent = "No recent tracks returned.";
+        } else {
+          results.textContent = tracks.map(track => {
+            const a = track.attributes || {};
+            return `${a.artistName || "Unknown artist"} — ${a.name || "Unknown track"}`;
+          }).join("\n");
+        }
+
+        status.textContent = "Recent plays request completed.";
+      } catch (error) {
+        status.textContent =
+          "Recent plays failed: " + (error.message || "Unknown error");
+      } finally {
+        recent.disabled = false;
       }
     });
   </script>
