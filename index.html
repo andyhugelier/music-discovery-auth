@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Music Discovery — Apple Music</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 480px;
+      margin: 60px auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    button, input {
+      font: inherit;
+      padding: 12px;
+      margin: 8px 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    input { width: 100%; }
+    button { cursor: pointer; }
+    #status { white-space: pre-wrap; }
+  </style>
+  <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
+</head>
+<body>
+  <h1>Music Discovery</h1>
+  <p>Connect your Apple Music account to test personal music access.</p>
+
+  <label for="token">Temporary developer token</label>
+  <input id="token" type="password"
+         placeholder="Paste token here"
+         autocomplete="off">
+
+  <button id="connect">Connect to Apple Music</button>
+  <p id="status">Waiting for authorization.</p>
+
+  <script>
+    const status = document.getElementById("status");
+    const button = document.getElementById("connect");
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      status.textContent = "Initializing MusicKit...";
+
+      try {
+        const token = document.getElementById("token").value.trim();
+        if (!token) throw new Error("Enter a developer token first.");
+
+        await MusicKit.configure({
+          developerToken: token,
+          app: {
+            name: "Music Discovery",
+            build: "1.0"
+          }
+        });
+
+        const music = MusicKit.getInstance();
+        status.textContent = "Requesting Apple Music authorization...";
+
+        await music.authorize();
+
+        // Never display or store the Music User Token.
+        status.textContent =
+          "Apple Music authorization successful!";
+
+        // Discard the developer token from the input.
+        document.getElementById("token").value = "";
+      } catch (error) {
+        status.textContent =
+          "Authorization failed: " + (error.message || "Unknown error");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
