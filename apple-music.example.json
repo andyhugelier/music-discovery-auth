@@ -1,0 +1,9 @@
+{
+  "team_id": "TEAMID1234",
+  "key_id": "KEYID12345",
+  "private_key_path": "/run/secrets/AuthKey_KEYID12345.p8",
+  "credential_dir": "/app/config/private",
+  "database_path": "/app/data/listening-history.sqlite3",
+  "poll_seconds": 300,
+  "max_backoff_seconds": 3600
+}

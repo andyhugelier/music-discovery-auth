@@ -1,0 +1,7 @@
+# Allowlist: never send NAS mounts, Git metadata or credentials to the builder.
+**
+!Dockerfile
+!requirements.txt
+!music_auth.py
+!music_config.py
+!collector.py

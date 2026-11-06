@@ -91,15 +91,15 @@ Verified from the user's terminal output/screenshots:
 
 Local validation: 15 Python tests and the browser-flow test pass using synthetic credentials and mocked services.
 
-Still unverified: recovery after container recreation, NAS reboot, extended unattended operation, and reauthorization after token invalidation. The Apple identifiers are currently supplied through Docker exec environment options; durable runtime configuration is still needed for an automatic service. No collector has been deployed. The user authorized committing and pushing the authorization milestone on November 5, 2026.
+Still unverified at the authorization milestone: recovery after container recreation, NAS reboot, extended unattended operation, and reauthorization after token invalidation. Subsequent collector progress below records persistent runtime configuration and cross-container database verification. The user authorized committing and pushing the authorization milestone on November 5, 2026.
 
 ## Current limitations
 
-- Standalone NAS requests using a persisted Music User Token work after a container restart; recreation recovery and long-term unattended operation remain to be tested.
+- NAS authorization and saved collection history survive container recreation, with subsequent scheduled polling verified. Long-term unattended operation and NAS reboot recovery remain to be tested.
 - The initial manual handoff and owner-restricted persistence are implemented; automatic reauthorization is not implemented.
-- The current container installs dependencies at startup.
-- No persistent listening-history database exists yet.
-- No automatic polling or playlist generation exists yet.
+- The existing test container installs dependencies at startup; the deployed collector image installs pinned dependencies at build time.
+- A live SQLite database now exists on the NAS and has been verified across separate one-off containers.
+- Automatic polling is deployed on the NAS, with scheduled successes and healthy status verified. Playlist generation is not implemented.
 - Apple Music's recent-plays API may provide incomplete historical coverage and may not provide reliable play timestamps, skip events, or full listening durations. Do not invent these fields.
 
 ## Recommended architecture
@@ -124,13 +124,33 @@ The architecture is provisional and should be validated before implementation.
 - Use GitHub Pages only for browser-side functionality that can safely be public.
 - Do not put a private key in browser JavaScript.
 
+## Collector implementation progress (November 5, 2026)
+
+The user requested work on the always-on collector. Local implementation now includes:
+- `music_config.py` plus `music_auth.py configure`: persistent nonsecret IDs/paths at `/app/config/private/apple-music.json`, retaining environment compatibility.
+- `collector.py`: latest-ten polling every five minutes, ordered observation snapshots with storage deduplication, transactional SQLite persistence in `/app/data`, a process lock, scheduled retries with persisted next-attempt times, safe logs and graceful shutdown.
+- Snapshots are not individual play events. Exact play counts and playback times are not inferred. This first version does not paginate or backfill.
+- Local `status`, Docker `healthcheck`, and consistent standalone SQLite `backup` commands.
+- `Dockerfile`, `.dockerignore`, and `compose.collector.yaml`: a separate nonroot `music-discovery-collector` service using the existing mounts, with no published ports. The existing test service is retained.
+- `COLLECTOR.md`: concrete NAS build, one-poll validation, continuous startup, monitoring, backup/restore and rollback procedures.
+
+Docker Desktop was started for local validation: the Linux/amd64 image builds and a synthetic offline smoke test passes under a read-only root filesystem and 128 MB limit (about 58 MB peak process RSS in the short test). Package versions and the tested base-image digest are pinned. All 36 Python tests, the browser-flow test and Compose configuration validation pass. The user authorized committing and pushing this collector milestone after the successful NAS recreation check.
+
+The user approved NAS staging/build and a single live poll. Verified from the user's terminal output:
+- Source files were staged and the image built successfully on the NAS.
+- Nonsecret configuration was saved at `/app/config/private/apple-music.json`; a fresh helper container fetched ten recent tracks without shell Apple variables.
+- `Data` was owned by UID `1027` but had mode `555`. Changing only that directory to mode `700` fixed the write failure; ownership and existing file permissions were retained.
+- A single live collector poll saved a ten-track snapshot. A separate temporary container reported `healthy: true`, `successful_polls: 1`, `failed_polls: 0`, and `unique_snapshots: 1`, verifying cross-container persistence of the database.
+- The user subsequently approved continuous operation and started `music-discovery-collector`. A later status check reported `healthy: true`, `successful_polls: 5`, `failed_polls: 0`, and `unique_snapshots: 1`, verifying scheduled polling with unchanged responses reusing stored snapshots.
+- The user force-recreated only the collector service and checked again after scheduled polling resumed: `healthy: true`, `successful_polls: 9`, `failed_polls: 0`, `unique_snapshots: 1`. Configuration, authorization and database history survived recreation. Initial deployment checks are complete.
+- Multi-day resource usage, NAS reboot recovery, live backup/restore and reauthorization after invalidation are not yet verified. The service runs detached and does not depend on the user's SSH session or sudo password cache.
+
+User communication preference: explicitly label any required user action **Your next step** and name the terminal. Otherwise state when no action is needed. Do not imply background work continues after a response ends.
+
 ## Immediate next steps
 
-1. Verify saved authorization after separately reviewed container recreation; the restart test has passed.
-2. Make nonsecret runtime configuration persistent and clean up bootstrap credential copies after testing.
-3. Preserve the authorization milestone in Git; the user approved this checkpoint and push. Future pushes still require authorization and may publish GitHub Pages.
-4. Plan and implement the minimal Python collector with SQLite persistence after approval of that milestone.
-5. Move dependencies into a reproducible image build, add operational health reporting and backup/restore instructions.
-6. Review deployment before replacing the test container's `sleep infinity` command.
+1. Observe multi-day resource usage and collection freshness during the trial; initial deployment and recreation checks have passed.
+2. Clean up bootstrap credential copies and validate backup/restore during the trial. Add notifications and scheduled backups in a later iteration.
+3. Future changes still require authorization before pushing; the prior authorization milestone is `49ecdd0`, and this collector checkpoint includes the verified NAS deployment results.
 
-The user approved work on the authorization proof and persistence milestone. Preserve that scope; ask before external deployments or production infrastructure changes. Do not automatically push changes or deploy the collector.
+The user approved implementation of the collector after the completed authorization milestone. Ask before external deployments or production infrastructure changes. Do not automatically push changes or deploy the collector.

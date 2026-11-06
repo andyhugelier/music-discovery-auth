@@ -1,11 +1,17 @@
-# Music Discovery authorization
+# Music Discovery
 
-Browser MusicKit authorization and a small Python CLI for proving persistent,
-unattended Apple Music access on Synology. No collector or NAS deployment is
-included in this milestone. The user verified token import and a separate NAS
+Browser MusicKit authorization, persistent runtime configuration and a Python
+SQLite collector for Synology. The NAS image build, persistent configuration,
+single live poll and cross-container database check have passed. Continuous
+collection is running on the NAS with scheduled polls and healthy status verified.
+See [COLLECTOR.md](COLLECTOR.md) for
+behavior, configuration, deployment and recovery instructions.
+
+The user verified token import and a separate NAS
 access check on November 5, 2026; both returned 10 recent tracks. The user also
-verified the saved authorization works after a container restart. Container
-recreation and long-term unattended operation remain unverified.
+verified authorization after a container restart, then verified the collector's
+configuration, authorization, history and resumed polling after container
+recreation. Long-term unattended operation and NAS reboot recovery remain unverified.
 
 ## Credential model
 
@@ -13,6 +19,9 @@ recreation and long-term unattended operation remain unverified.
 - Set `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY_PATH` in the CLI's
   environment. IDs and paths are configuration; never put token values in
   environment variables, command arguments, shell history, source files or chat.
+- For the collector, `music_auth.py configure` persists the nonsecret IDs and key
+  path in `/app/config/private/apple-music.json`; no per-session environment setup
+  is needed afterward. Environment variables still override the file when set.
 - Credentials live in `/app/config/private` (the existing persistent `Config`
   bind mount). The directory must be mode `700`; files must be `600` or `400`.
   The key and credential files must belong to the user running the CLI. Synology
@@ -50,7 +59,7 @@ Do not replace the existing Compose service or recreate its container yet.
    `ssh -p PORT USER@NAS_HOST`. Enter passwords only into your own terminal.
    Verify a first-connection host fingerprint through a trusted source before
    accepting it. No router port forwarding is needed for local-network access.
-2. After staging approval, transfer `music_auth.py` into `Config` under
+2. After staging approval, transfer `music_auth.py` **and** `music_config.py` into `Config` under
    `/volume1/docker/Music-discovery`. It will appear at `/app/config/music_auth.py`
    in the existing container (the path used for the verified proof). Use a runtime user
    that owns the key and can write the private credential directory. Supply the
@@ -87,13 +96,13 @@ Do not replace the existing Compose service or recreate its container yet.
 5. Close the browser and run `check` again. After a separately approved container
    restart, repeat it to establish persistence. Later verify survival of container
    recreation with the same `Config` mount. The standalone access and restart
-   checks passed; the recreation check is still pending.
+   checks passed, as did the collector's subsequent recreation check.
 
 To test the updated UI before publishing, serve **only** `index.html` and
 `auth.js` from a separate temporary directory on `127.0.0.1`, using
 `python3 -m http.server 8000 --bind 127.0.0.1`. Open `http://localhost:8000`.
 Do not serve the repository root or NAS credential directories. The current
-GitHub Pages version will not have the copy button until publication is approved.
+GitHub Pages version includes the copy button from the authorized milestone push.
 The bootstrap JWT has no origin restriction so it can support this local proof;
 the eventual hosted bootstrap should use an origin-restricted token.
 

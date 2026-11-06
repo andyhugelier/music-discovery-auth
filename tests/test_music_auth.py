@@ -30,7 +30,7 @@ class AuthorizationTests(unittest.TestCase):
         with patch.object(auth, "check_access", return_value=0) as check:
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(auth.main(["--credential-dir", str(self.directory), "check"]), 0)
-            check.assert_called_once_with("synthetic-user-token")
+            self.assertEqual(check.call_args.args[0], "synthetic-user-token")
 
     def test_unsafe_permissions_and_symlinks_rejected(self):
         auth.write_private(self.directory, "token", "synthetic")
