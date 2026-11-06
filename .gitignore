@@ -1,0 +1,19 @@
+# Credentials and NAS bind mounts (capitalization is intentional).
+Secrets/
+Config/
+Data/
+secrets/
+config/
+data/
+*.p8
+*.pem
+*.key
+*token*.json
+*token*.txt
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store

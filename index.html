@@ -35,79 +35,17 @@
          placeholder="Paste token here"
          autocomplete="off">
 
-  <button id="connect">Connect to Apple Music</button>
+  <button id="connect">Prepare Apple Music</button>
   <button id="recent" disabled>Test Recent Plays</button>
+  <button id="copy-token" disabled>Copy NAS authorization token</button>
+  <button id="clear-clipboard">Clear clipboard</button>
+  <p>Copy the token only when you are ready to paste it into the NAS's hidden
+    SSH prompt. Treat it like a password. Clear your clipboard afterward;
+    clipboard history or sync may retain a copy.</p>
 
   <p id="status">Waiting for authorization.</p>
   <div id="results"></div>
 
-  <script>
-    const status = document.getElementById("status");
-    const connect = document.getElementById("connect");
-    const recent = document.getElementById("recent");
-    const results = document.getElementById("results");
-
-    let music;
-
-    connect.addEventListener("click", async () => {
-      connect.disabled = true;
-      status.textContent = "Initializing MusicKit...";
-
-      try {
-        const token = document.getElementById("token").value.trim();
-        if (!token) throw new Error("Enter a developer token first.");
-
-        await MusicKit.configure({
-          developerToken: token,
-          app: { name: "Music Discovery", build: "1.0" }
-        });
-
-        music = MusicKit.getInstance();
-        status.textContent = "Requesting authorization...";
-
-        await music.authorize();
-
-        document.getElementById("token").value = "";
-        recent.disabled = false;
-        status.textContent = "Apple Music connected!";
-      } catch (error) {
-        status.textContent =
-          "Authorization failed: " + (error.message || "Unknown error");
-      } finally {
-        connect.disabled = false;
-      }
-    });
-
-    recent.addEventListener("click", async () => {
-      recent.disabled = true;
-      status.textContent = "Fetching recently played tracks...";
-      results.textContent = "";
-
-      try {
-        const response = await music.api.music(
-          "/v1/me/recent/played/tracks",
-          { limit: 10 }
-        );
-
-        const tracks = response.data.data || [];
-
-        if (!tracks.length) {
-          results.textContent = "No recent tracks returned.";
-        } else {
-          results.textContent = tracks.map(track => {
-            const a = track.attributes || {};
-            return `${a.artistName || "Unknown artist"} — ${a.name || "Unknown track"}`;
-          }).join("\n");
-        }
-
-        status.textContent = "Recent plays request completed.";
-      } catch (error) {
-        status.textContent =
-          "Recent plays failed: " + (error.message || "Unknown error");
-      } finally {
-        recent.disabled = false;
-      }
-    });
-  </script>
+  <script src="auth.js"></script>
 </body>
 </html>
