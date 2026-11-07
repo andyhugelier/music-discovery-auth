@@ -83,9 +83,11 @@ Plan a bounded read-only sample for feature/similarity evaluation,
 without treating ownership as a like or training a current preference model from
 this collection. Coverage for current releases and mood confidence remain
 unresolved feature-source questions.
-Research is documentation-only; no enrichment pilot, benchmark or engine/UI is
-implemented yet. Do not upload history to ListenBrainz or assume protected streams
-can be analyzed. Keep the first implementation bounded and measure real quality.
+The initial research checkpoint was documentation-only. A reproducible genre/tag
+baseline and local review UI have since been implemented (progress below); NMF,
+graph grouping, audio analysis and recommendation generation remain unimplemented.
+Do not upload history to ListenBrainz or assume protected streams can be analyzed.
+Keep implementation bounded and measure real quality.
 
 The user agreed with this direction; the weekly mix size remains a proposed default:
 1. Build a reviewable, editable taste profile from current observations, historical
@@ -535,18 +537,59 @@ User communication preference: explicitly label any required user action **Your 
 
 ## Immediate next steps
 
-1. Follow `RECOMMENDATION_DESIGN.md`: implement reproducible, context-filtered
-   derived profiles, measured metadata/similarity enrichment and reviewable
-   overlapping interests with a simple polished UI. Then add controllable station
-   previews, contextual feedback and catalog-matched batches before playlist
-   delivery. Exclude suspicious dates from temporal weighting.
-   Incorporate the imported Spotify history and reconcile provenance/coverage
-   across sources. The recommendation engine and editable
-   taste-profile interface are not implemented yet.
+1. Review the working local taste-group baseline described in `TASTE_PROFILE.md`.
+   Compare improved grouping, recording identity resolution and candidate sources
+   against it, then add controllable station previews and catalog-matched batches.
+   Mood/audio models, cross-source play reconciliation and recommendation ranking
+   remain unimplemented. Exclude suspicious dates from temporal weighting.
 2. Keep the NAS collector running and observe multi-day resource usage and
    freshness. Clean up bootstrap credential copies and validate backup/restore
    during the trial; add notifications and scheduled backups in a later iteration.
 3. Future changes require authorization before pushing. Completed checkpoints:
    authorization `49ecdd0`, deployed collector `b9a635a`.
+
+## Local taste review implementation (November 6, 2026)
+
+The user requested commit/push of existing work, followed by implementation of
+the next step. Importers, tests and research were committed and pushed to main
+as `09f41a2`. The user subsequently explicitly requested committing and pushing
+the taste-review implementation below as its own checkpoint.
+
+`taste_profile.py` builds private `Data/taste-profile.sqlite3` from the three
+source databases without changing them. It retains source-track identities,
+observational semantics, source coverage and versioned explicit review actions.
+Context rules are seeded once from the private approved context file; UI edits
+persist across rebuilds. The previous review JSON is a legacy snapshot, not the
+live store. No source records are merged into supposedly independent play counts.
+
+The first model is deliberately an inspectable overlapping genre/tag baseline,
+not inferred psychological clusters or mood classification. Track genres take
+priority over artist-level tag/library estimates. Heuristic example strength
+saturates playback evidence and treats saved-only membership weakly; weights
+are not learned or liking probabilities. Twelve broad groups are available.
+
+`profile_server.py` and `review/` provide a local web interface with group cards,
+source evidence, search, exclusions, rename/manual membership edits and undo.
+It binds only `127.0.0.1:8765`, validates Host/Origin and CSRF, serves an asset
+allowlist, renders source strings as text, and exposes no filesystem/Data route.
+It is a foreground local process, not a deployed/scheduled service. Start with
+`.venv/bin/python profile_server.py`; Ctrl+C stops it. See `TASTE_PROFILE.md`.
+
+Verified live local data: 169,970 source-track summaries, 1,909 excluded and
+168,061 eligible. A bounded 50-artist Last.fm metadata pilot returned 49 usable
+tag sets and one empty result. Grouped eligible source tracks increased from
+129,399 to 129,547; 38,514 remain unclassified. This is metadata coverage, not
+recommendation quality. The existing hidden API key was used internally without
+displaying it; only artist-name read queries were sent, not listening archives.
+Last.fm's client allowlist now additionally permits `artist.getTopTags`.
+
+Rebuild/integrity checks preserved source hashes and existing exclusion/keep
+exceptions. A Mac build plus validation took about 11 seconds and peaked around
+474 MB RSS including hash-verification overhead; no NAS runtime limit is claimed.
+Browser checks at desktop and 390px mobile verified groups, search, rename,
+membership editing, exclusions and undo; test changes were undone. All 96 Python
+tests, the browser authorization test, JavaScript syntax and diff checks pass.
+The final reviewed server was started on 127.0.0.1:8765 for the user's local
+review; this is an actual foreground tool process, not ongoing development work.
 
 The user approved implementation of the collector after the completed authorization milestone. Ask before external deployments or production infrastructure changes. Do not automatically push changes or deploy the collector.

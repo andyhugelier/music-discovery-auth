@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Music Discovery · Your taste</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Music Discovery home"><span class="brand-mark" aria-hidden="true">≋</span> Music<br><span class="brand-sub">Discovery</span></a>
+    <p class="nav-label">YOUR COLLECTION</p>
+    <nav aria-label="Review navigation">
+      <button class="nav-item active" id="nav-taste" aria-current="page"><span aria-hidden="true">◉</span> Your taste</button>
+      <button class="nav-item" id="nav-excluded"><span aria-hidden="true">⊘</span> Exclusions <span id="nav-count" class="nav-count"></span></button>
+    </nav>
+    <div class="coming-next"><p class="nav-label">UP NEXT</p><p>Stations, shaped by you.</p><span>Review your taste first. Station previews will build on these choices.</span></div>
+    <div class="local-note"><span class="status-dot" aria-hidden="true"></span> Private, on this computer</div>
+  </aside>
+  <main>
+    <header class="topbar"><span class="breadcrumb">YOUR MUSIC, IN PERSPECTIVE</span><span class="version">TASTE LAB <span>01</span></span></header>
+    <section class="intro">
+      <div><p class="eyebrow">A LITTLE FAMILIAR. A LITTLE FURTHER.</p><h1 id="page-title">Many sides.<br>All your taste.</h1><p class="intro-copy" id="intro-copy">Explore the threads running through your listening. Keep what feels like you, and give everything else its own space.</p></div>
+      <div class="orbit" aria-hidden="true"><span></span><span></span><span></span><i></i><b>YOUR<br>ORBIT</b></div>
+    </section>
+    <section class="metrics" aria-label="Profile overview">
+      <div><span class="metric-label">SOURCE TRACKS</span><strong id="stat-tracks">—</strong><small>before matching across services</small></div>
+      <div><span class="metric-label">OVERLAPPING GROUPS</span><strong id="stat-groups">—</strong><small>a starting point you can shape</small></div>
+      <div><span class="metric-label">IN SEPARATE CONTEXTS</span><strong id="stat-excluded">—</strong><small>kept out of personal discovery</small></div>
+    </section>
+    <div id="status" role="status" aria-live="polite">Loading your private profile…</div>
+    <section id="taste-view">
+      <div class="section-heading"><div><p class="eyebrow">THE THREADS</p><h2>Your musical neighborhoods</h2></div><span class="small-note">Tracks can belong to more than one.</span></div>
+      <div id="groups" class="groups" aria-label="Taste groups"></div>
+      <details class="method"><summary>How these groups are formed</summary><p>These are broad genre and tag groups, not learned clusters. Track genres are used first. Where those are missing, artist tags or genres from other library tracks by the artist provide a provisional estimate. They describe style, not your mood or a confirmed preference.</p><p id="coverage-note"></p><p>Source tracks remain separate across services. Counts are not unique recordings or independent plays. A saved song alone is weak evidence; explicit preferences and repeated listening guide the representative examples.</p><p>Genre and tag metadata supplied in part by <a href="https://www.last.fm" target="_blank" rel="noreferrer">Last.fm</a>.</p></details>
+    </section>
+    <section id="track-section" hidden>
+      <div class="section-heading"><div><p class="eyebrow" id="track-eyebrow">A CLOSER LOOK</p><h2 id="track-heading">Tracks & evidence</h2></div><button id="clear-group" class="text-button">All tracks</button></div>
+      <div class="tools"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search artists or tracks" aria-label="Search artists or tracks"></label><span class="small-note" id="result-count"></span></div>
+      <div id="track-list" class="track-list"></div>
+      <button class="secondary load-more" id="load-more" hidden>Show more tracks</button>
+    </section>
+    <footer><span>Built from your history. Refined by your judgment.</span><button class="text-button" id="browse-all">Browse all tracks →</button></footer>
+  </main>
+  <div id="toast" role="status" hidden><span id="toast-text"></span><button id="undo">Undo</button></div>
+  <dialog id="rename-dialog"><form id="rename-form"><p class="eyebrow">MAKE IT YOURS</p><h2>Name this neighborhood</h2><label for="group-name">Group name</label><input id="group-name" maxlength="70" required autocomplete="off"><div class="dialog-actions"><button type="button" class="secondary" id="cancel-rename">Cancel</button><button type="submit" class="primary">Save name</button></div></form></dialog>
+  <dialog id="groups-dialog"><form id="groups-form"><p class="eyebrow">FOLLOW YOUR EAR</p><h2>Where does this track belong?</h2><p id="editing-track" class="small-note"></p><div id="group-choices" class="group-choices"></div><p class="small-note">Choose several groups, or none to leave it unclassified. This edits the source track shown; recordings across services are still separate.</p><div class="dialog-actions"><button type="button" class="secondary" id="cancel-groups">Cancel</button><button type="submit" class="primary">Save groups</button></div></form></dialog>
+  <noscript>This private review interface needs JavaScript. Run profile_server.py and open the local URL.</noscript>
+</body>
+</html>

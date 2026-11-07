@@ -78,7 +78,7 @@ class Client:
         self.last_request = None
 
     def request(self, method, **parameters):
-        if method not in {"user.getInfo", "user.getRecentTracks", "user.getLovedTracks"}:
+        if method not in {"user.getInfo", "user.getRecentTracks", "user.getLovedTracks", "artist.getTopTags"}:
             raise ImportFailure("Only supported read methods are allowed.", "configuration")
         for attempt in range(3):
             if self.last_request is not None:

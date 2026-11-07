@@ -16,6 +16,11 @@ privately; cross-source event reconciliation and recommendation ranking remain
 to be implemented. [RECOMMENDATION_DESIGN.md](RECOMMENDATION_DESIGN.md) records the
 researched architecture and proposed taste-group/station milestones.
 
+[TASTE_PROFILE.md](TASTE_PROFILE.md) documents the new reproducible profile builder
+and private local review interface: overlapping groups, source evidence, persistent
+group edits, exclusions and undo. Start it with `.venv/bin/python profile_server.py`
+after building the profile, then open http://127.0.0.1:8765.
+
 [APPLE_SNAPSHOT.md](APPLE_SNAPSHOT.md) documents the read-only Apple Music
 library/preference export and its per-section coverage reporting.
 
