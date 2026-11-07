@@ -22,3 +22,8 @@ apple-music.json
 *.sqlite3-wal
 *.sqlite3-shm
 *.sqlite3.lock
+lastfm-api-key
+# Personal streaming-history exports, if accidentally copied beside the code.
+Streaming_History_*.json
+Spotify Extended Streaming History/
+ReadMeFirst_ExtendedStreamingHistory.pdf

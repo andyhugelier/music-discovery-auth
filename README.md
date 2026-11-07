@@ -7,6 +7,18 @@ collection is running on the NAS with scheduled polls and healthy status verifie
 See [COLLECTOR.md](COLLECTOR.md) for
 behavior, configuration, deployment and recovery instructions.
 
+Historical imports are the next taste-profile step. [LASTFM.md](LASTFM.md)
+documents the local Last.fm importer, hidden API-key setup, resumable scrobbles
+and loved tracks, and coverage reporting. It does not modify the running NAS
+collector. [SPOTIFY.md](SPOTIFY.md) documents the offline extended-history importer,
+repeat-delivery handling and coverage. The first Spotify delivery has been imported
+privately; cross-source event reconciliation and recommendation ranking remain
+to be implemented. [RECOMMENDATION_DESIGN.md](RECOMMENDATION_DESIGN.md) records the
+researched architecture and proposed taste-group/station milestones.
+
+[APPLE_SNAPSHOT.md](APPLE_SNAPSHOT.md) documents the read-only Apple Music
+library/preference export and its per-section coverage reporting.
+
 The user verified token import and a separate NAS
 access check on November 5, 2026; both returned 10 recent tracks. The user also
 verified authorization after a container restart, then verified the collector's
